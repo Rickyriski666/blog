@@ -1,12 +1,12 @@
-const dummy = (blogs) => {
-  return 1;
-};
-
 const totalLikes = (blogs) => {
   const likes = [];
 
   blogs.map((blog) => {
-    likes.push(blog.likes);
+    if (!blog.likes) {
+      likes.push(blog);
+    } else {
+      likes.push(blog.likes);
+    }
   });
 
   const totalLikes = likes.reduce((sum, item) => {
@@ -16,7 +16,4 @@ const totalLikes = (blogs) => {
   return totalLikes;
 };
 
-module.exports = {
-  dummy,
-  totalLikes
-};
+module.exports = totalLikes;
