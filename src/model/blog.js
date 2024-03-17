@@ -1,7 +1,10 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-const URL = process.env.mongo_URL;
+const URL =
+  process.env.NODE_ENV === 'test'
+    ? process.env.BLOG_DB_TEST
+    : process.env.BLOG_DB;
 
 console.log('connecting to db');
 
@@ -15,10 +18,29 @@ mongoose
   });
 
 const blogSchema = new mongoose.Schema({
-  title: String,
-  author: String,
-  url: String,
-  likes: Number
+  title: {
+    type: String,
+    required: [true, 'Title required']
+  },
+  author: {
+    type: String,
+    required: [true, 'Author required']
+  },
+  url: {
+    type: String,
+    required: [true, 'url required']
+  },
+  likes: {
+    type: Number,
+    default: 0
+  }
+});
+
+blogSchema.pre('save', function (next) {
+  if (!this.likes || this.likes === '') {
+    this.likes = 0;
+  }
+  next();
 });
 
 blogSchema.set('toJSON', {
