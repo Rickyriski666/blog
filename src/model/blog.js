@@ -1,39 +1,23 @@
 const mongoose = require('mongoose');
-require('dotenv').config();
-
-const URL =
-  process.env.NODE_ENV === 'test'
-    ? process.env.BLOG_DB_TEST
-    : process.env.BLOG_DB;
-
-console.log('connecting to db');
-
-mongoose
-  .connect(URL)
-  .then(() => {
-    console.log('connected to db');
-  })
-  .catch((error) => {
-    console.log(error.message);
-  });
+const db = require('../db/blog_DB');
 
 const blogSchema = new mongoose.Schema({
   title: {
     type: String,
-    required: [true, 'Title required']
+    required: [true, 'Title required'],
   },
   author: {
     type: String,
-    required: [true, 'Author required']
+    required: [true, 'Author required'],
   },
   url: {
     type: String,
-    required: [true, 'url required']
+    required: [true, 'url required'],
   },
   likes: {
     type: Number,
-    default: 0
-  }
+    default: 0,
+  },
 });
 
 blogSchema.pre('save', function (next) {
@@ -48,9 +32,14 @@ blogSchema.set('toJSON', {
     returnedObject.id = returnedObject._id.toString();
     delete returnedObject._id;
     delete returnedObject.__v;
-  }
+
+    return {
+      id: returnedObject.id,
+      ...returnedObject,
+    };
+  },
 });
 
-const Blog = mongoose.model('Blog', blogSchema);
+const Blog = db.model('Blog', blogSchema);
 
 module.exports = Blog;
