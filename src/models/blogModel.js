@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const db = require('../db/blog_DB');
 
 const blogSchema = new mongoose.Schema({
   title: {
@@ -14,6 +13,12 @@ const blogSchema = new mongoose.Schema({
     type: String,
     required: [true, 'url required'],
   },
+  user: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+  ],
   likes: {
     type: Number,
     default: 0,
@@ -40,6 +45,4 @@ blogSchema.set('toJSON', {
   },
 });
 
-const Blog = db.model('Blog', blogSchema);
-
-module.exports = Blog;
+module.exports = blogSchema;

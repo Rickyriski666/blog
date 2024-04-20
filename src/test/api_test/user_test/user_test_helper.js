@@ -1,4 +1,4 @@
-const User = require('../../../model/userModel');
+const DB = require('../../../models');
 
 const initialUsers = [
   {
@@ -14,7 +14,7 @@ const initialUsers = [
 ];
 
 const dataInDB = async () => {
-  const datas = await User.find({});
+  const datas = await DB.userModel.find({});
 
   return datas.map((data) => data.toJSON());
 };

@@ -1,17 +1,17 @@
 const { test, describe, beforeEach, afterEach } = require('node:test');
 const assert = require('node:assert');
 const mongoose = require('mongoose');
-const User = require('../../../model/userModel');
+const DB = require('../../../models');
 const supertest = require('supertest');
 const app = require('../../../app');
 const api = supertest(app);
 const helper = require('./user_test_helper');
 
 beforeEach(async () => {
-  await User.deleteMany({});
+  await DB.userModel.deleteMany({});
 
   for (const user of helper.initialUsers) {
-    let newUser = new User(user);
+    let newUser = new DB.userModel(user);
     await newUser.save();
   }
 });

@@ -1,19 +1,19 @@
 const logger = require('../utils/logger/logger');
 
 const errorHandler = (error, req, res, next) => {
-  logger.error(error.message);
+  logger.error(error.stack);
 
   if (error.name === 'CastError') {
     return res.status(400).json({
       status: 'Error',
-      message: 'malformatted ID'
+      message: 'malformatted ID',
     });
   }
 
   if (error.name === 'ValidationError') {
     return res.status(400).json({
       status: 'Failed to save',
-      message: error.message
+      message: error.message,
     });
   }
 };

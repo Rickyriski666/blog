@@ -1,15 +1,17 @@
 const blogRouter = require('express').Router();
-const Blog = require('../model/blog');
+const DB = require('../models');
 
 blogRouter.get('/', async (req, res, next) => {
   try {
-    const blogs = await Blog.find({});
+    const blogs = await DB.blogModel.find({}).populate('user', {
+      username: 1,
+      name: 1,
+    });
 
-    console.log(blogs);
-
+    DB.blogModel.find;
     res.status(200).json({
       status: 'success',
-      data: blogs
+      data: blogs,
     });
   } catch (error) {
     next(error);
@@ -19,17 +21,17 @@ blogRouter.get('/', async (req, res, next) => {
 blogRouter.get('/:id', async (req, res, next) => {
   try {
     const id = req.params.id;
-    const blog = await Blog.findById(id);
+    const blog = await DB.blogModel.findById(id);
 
     if (blog) {
       res.status(200).json({
         status: 'success',
-        data: blog
+        data: blog,
       });
     } else {
       res.status(404).json({
         status: 'Data Not Found',
-        data: blog
+        data: blog,
       });
     }
   } catch (error) {
@@ -39,13 +41,25 @@ blogRouter.get('/:id', async (req, res, next) => {
 
 blogRouter.post('/', async (req, res, next) => {
   try {
-    const blog = new Blog(req.body);
+    const { title, author, url, likes, userId } = req.body;
+    const user = await DB.userModel.findById(userId);
+
+    const blog = new DB.blogModel({
+      title,
+      author,
+      url,
+      likes,
+      user: user.id,
+    });
 
     const savedBlog = await blog.save();
 
+    user.blogs = user.blogs.concat(savedBlog._id);
+    await user.save();
+
     res.status(201).json({
       status: 'success',
-      data: savedBlog
+      data: savedBlog,
     });
   } catch (error) {
     next(error);
@@ -56,15 +70,14 @@ blogRouter.delete('/:id', async (req, res, next) => {
   try {
     const id = req.params.id;
 
-    const deletedBlog = await Blog.findByIdAndDelete(id);
-
+    const deletedBlog = await DB.blogModel.findByIdAndDelete(id);
     if (deletedBlog) {
       res.status(204).json({
-        status: 'delete successfull'
+        status: 'delete successfull',
       });
     } else {
       res.status(404).json({
-        status: 'Data Not Found'
+        status: 'Data Not Found',
       });
     }
   } catch (error) {
@@ -77,18 +90,18 @@ blogRouter.put('/:id', async (req, res, next) => {
     const id = req.params.id;
     const blog = req.body;
 
-    const updatedBlog = await Blog.findByIdAndUpdate(id, blog, {
-      returnDocument: 'after'
+    const updatedBlog = await DB.blogModel.findByIdAndUpdate(id, blog, {
+      returnDocument: 'after',
     });
 
     if (updatedBlog) {
       res.status(200).json({
         status: 'update successfull',
-        data: updatedBlog
+        data: updatedBlog,
       });
     } else {
       res.status(404).json({
-        status: 'Data Not Found'
+        status: 'Data Not Found',
       });
     }
   } catch (error) {

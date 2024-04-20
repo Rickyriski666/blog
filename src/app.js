@@ -4,7 +4,6 @@ const cors = require('cors');
 const blogRoute = require('./controller/blogController');
 const middleware = require('./middleware/index');
 const userRouter = require('./controller/userController');
-
 require('dotenv').config();
 
 app.use(cors());

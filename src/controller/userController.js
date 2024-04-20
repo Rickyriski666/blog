@@ -1,12 +1,13 @@
 const userRouter = require('express').Router();
-const User = require('../model/userModel');
+const DB = require('../models');
 const middleware = require('../middleware/');
 const hashPassword = require('../utils/hashPassword');
 
 userRouter.get('/', async (req, res, next) => {
   try {
-    const users = await User.find({});
+    const users = await DB.userModel.find({}).populate('blogs', { user: 0 });
 
+    console.log(users);
     res.status(200).json({
       status: 'Success get users',
       data: users,
@@ -22,7 +23,7 @@ userRouter.post('/', middleware.validatePassword, async (req, res, next) => {
 
     const encryptPassword = await hashPassword(password);
 
-    const user = new User({
+    const user = new DB.userModel({
       username,
       name,
       password: encryptPassword,

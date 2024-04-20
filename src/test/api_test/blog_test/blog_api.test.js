@@ -1,10 +1,10 @@
 const { test, beforeEach, after } = require('node:test');
 const assert = require('node:assert');
-const Blog = require('../../model/blog');
+const Blog = require('../../../model/blog');
 const helper = require('./api_test_helper');
 
 const supertest = require('supertest');
-const app = require('../../app');
+const app = require('../../../app');
 const { default: mongoose } = require('mongoose');
 const api = supertest(app);
 
@@ -38,7 +38,7 @@ test('post a valid blog', async () => {
     title: 'newBlog',
     author: 'newAuthor',
     url: 'newUrl.com',
-    likes: 10
+    likes: 10,
   };
 
   await api
@@ -58,7 +58,7 @@ test('verify likes if empty = 0', async () => {
   const newBlog = {
     title: 'like0',
     author: 'like0',
-    url: 'like0.com'
+    url: 'like0.com',
   };
 
   const response = await api
@@ -78,20 +78,20 @@ test('create blog with title or url are missing', async () => {
       title: '',
       author: 'mising author',
       url: 'misingauthor.com',
-      likes: 1
+      likes: 1,
     },
     {
       title: 'mising url',
       author: 'mising url',
       url: '',
-      likes: 1
+      likes: 1,
     },
     {
       title: '',
       author: 'both missing',
       url: '',
-      likes: 1
-    }
+      likes: 1,
+    },
   ];
 
   for (const blog of newBlog) {
