@@ -13,12 +13,33 @@ const initialUsers = [
   },
 ];
 
+const initialBlogs = [
+  {
+    title: 'blog 1 test',
+    author: 'blog 1 author',
+    url: 'blog1.com',
+    likes: 25,
+  },
+  {
+    title: 'blog 2 test',
+    author: 'blog 2 author',
+    url: 'blog2.com',
+    likes: 25,
+  },
+];
+
 const dataInDB = async () => {
   const datas = await DB.userModel.find({});
 
   return datas.map((data) => data.toJSON());
 };
 
+const userID = async () => {
+  const users = await dataInDB();
+
+  return users[0].id;
+};
+
 const contentType = /application\/json/;
 
-module.exports = { initialUsers, dataInDB, contentType };
+module.exports = { initialUsers, initialBlogs, dataInDB, userID, contentType };
