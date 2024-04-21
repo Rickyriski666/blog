@@ -7,7 +7,6 @@ userRouter.get('/', async (req, res, next) => {
   try {
     const users = await DB.userModel.find({}).populate('blogs', { user: 0 });
 
-    console.log(users);
     res.status(200).json({
       status: 'Success get users',
       data: users,
