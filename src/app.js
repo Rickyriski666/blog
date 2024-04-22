@@ -1,16 +1,17 @@
 const express = require('express');
 const app = express();
 const cors = require('cors');
-const blogRoute = require('./controller/blogController');
+const Route = require('./controller');
 const middleware = require('./middleware/index');
-const userRouter = require('./controller/userController');
+const validateToken = require('./middleware/validateToken');
 require('dotenv').config();
 
 app.use(cors());
 app.use(express.json());
 
-app.use('/api/blogs', blogRoute);
-app.use('/api/users', userRouter);
+app.use('/login', Route.loginRouter);
+app.use('/api/blogs', validateToken, Route.blogRouter);
+app.use('/api/users', Route.userRouter);
 
 app.use(middleware.unknownEndpoint);
 app.use(middleware.errorHandler);

@@ -3,6 +3,8 @@ const DB = require('../models');
 
 blogRouter.get('/', async (req, res, next) => {
   try {
+    console.log(req.user);
+
     const blogs = await DB.blogModel.find({}).populate('user', {
       username: 1,
       name: 1,
@@ -70,11 +72,22 @@ blogRouter.delete('/:id', async (req, res, next) => {
   try {
     const id = req.params.id;
 
-    const deletedBlog = await DB.blogModel.findByIdAndDelete(id);
-    if (deletedBlog) {
-      res.status(204).json({
-        status: 'delete successfull',
-      });
+    const blog = await DB.blogModel.findById(id);
+    const user = req.user;
+
+    if (blog) {
+      if (blog.user.toString() === user.id.toString()) {
+        await DB.blogModel.findByIdAndDelete(id);
+
+        res.status(204).json({
+          status: 'delete successfull',
+        });
+      } else {
+        res.status(401).json({
+          status: 'Unauthorized',
+          message: 'Failed to delete',
+        });
+      }
     } else {
       res.status(404).json({
         status: 'Data Not Found',
