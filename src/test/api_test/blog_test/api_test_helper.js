@@ -1,4 +1,7 @@
 const DB = require('../../../models');
+const supertest = require('supertest');
+const app = require('../../../app');
+const api = supertest(app);
 
 const initialBlogs = [
   {
@@ -15,6 +18,21 @@ const initialBlogs = [
   },
 ];
 
+const initialUsers = [
+  {
+    username: 'usertest1',
+    name: 'usertest1',
+    password: 'passwordUserTest1',
+  },
+  {
+    username: 'usertest2',
+    name: 'usertest2',
+    password: 'passwordUserTest2',
+  },
+];
+
+const contentType = /application\/json/;
+
 const blogSaved = async () => {
   const blogs = await DB.blogModel.find({});
 
@@ -27,6 +45,22 @@ const userID = async () => {
   return users[0].id.toString();
 };
 
-const contentType = /application\/json/;
+const getToken = async () => {
+  const token = await api
+    .post('/login')
+    .send({ username: 'usertest1', password: 'passwordUserTest1' })
+    .then((res) => {
+      return res.body.data.token;
+    });
 
-module.exports = { initialBlogs, blogSaved, contentType, userID };
+  return token;
+};
+
+module.exports = {
+  initialBlogs,
+  initialUsers,
+  blogSaved,
+  contentType,
+  userID,
+  getToken,
+};

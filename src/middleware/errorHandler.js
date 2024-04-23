@@ -19,7 +19,7 @@ const errorHandler = (error, req, res, next) => {
   }
 
   if (error.name === 'JsonWebTokenError') {
-    return res.status(400).json({
+    return res.status(401).json({
       status: 'Failed',
       message: error.message,
     });

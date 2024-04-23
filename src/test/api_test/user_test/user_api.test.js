@@ -6,13 +6,13 @@ const supertest = require('supertest');
 const app = require('../../../app');
 const api = supertest(app);
 const helper = require('./user_test_helper');
+const { getToken } = require('../blog_test/api_test_helper');
 
 beforeEach(async () => {
   await DB.userModel.deleteMany({});
 
   for (const user of helper.initialUsers) {
-    let newUser = new DB.userModel(user);
-    await newUser.save();
+    await api.post('/api/users').send(user);
   }
 });
 
@@ -69,15 +69,18 @@ describe('create new user function', () => {
 describe('count total blogs', () => {
   test('total blogs created', async () => {
     const userID = await helper.userID();
+    const token = await getToken();
 
     for (const blog of helper.initialBlogs) {
-      await api.post('/api/blogs').send({ ...blog, userId: userID });
+      await api
+        .post('/api/blogs')
+        .send({ ...blog, userId: userID })
+        .set('Authorization', `Bearer ${token}`);
     }
 
     const user = await api
       .get(`/api/users/${userID}`)
       .then((res) => res.body.data);
-    console.log(user);
     assert.strictEqual(user.blogs.length, helper.initialBlogs.length);
   });
 });

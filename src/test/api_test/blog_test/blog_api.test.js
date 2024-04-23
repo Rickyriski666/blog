@@ -5,27 +5,34 @@ const helper = require('./api_test_helper');
 
 const supertest = require('supertest');
 const app = require('../../../app');
-const { default: mongoose } = require('mongoose');
 const api = supertest(app);
+const { default: mongoose } = require('mongoose');
 
 beforeEach(async () => {
   await DB.blogModel.deleteMany({});
-  const userID = await helper.userID();
+  await DB.userModel.deleteMany({});
 
+  for (const user of helper.initialUsers) {
+    await api.post('/api/users').send(user);
+  }
+
+  const userID = await helper.userID();
+  const token = await helper.getToken();
   for (const blog of helper.initialBlogs) {
-    let blogObject = new DB.blogModel({
-      ...blog,
-      user: userID,
-    });
-    await blogObject.save();
+    await api
+      .post('/api/blogs')
+      .send({ ...blog, userId: userID })
+      .set('Authorization', `Bearer ${token}`);
   }
 });
 
 test('return must be JSON', async () => {
+  const token = await helper.getToken();
   await api
     .get('/api/blogs')
+    .set('Authorization', `Bearer ${token}`)
     .expect(200)
-    .expect('Content-Type', /application\/json/);
+    .expect('Content-Type', helper.contentType);
 });
 
 test('verify identifier id', async () => {
@@ -39,6 +46,7 @@ test('verify identifier id', async () => {
 
 test('post a valid blog', async () => {
   const userID = await helper.userID();
+  const token = await helper.getToken();
 
   const newBlog = {
     title: 'newBlog',
@@ -51,6 +59,7 @@ test('post a valid blog', async () => {
   await api
     .post('/api/blogs')
     .send(newBlog)
+    .set('Authorization', `Bearer ${token}`)
     .expect(201)
     .expect('Content-Type', helper.contentType);
 
@@ -63,6 +72,7 @@ test('post a valid blog', async () => {
 
 test('verify likes if empty = 0', async () => {
   const userID = await helper.userID();
+  const token = await helper.getToken();
 
   const newBlog = {
     title: 'like0',
@@ -74,6 +84,7 @@ test('verify likes if empty = 0', async () => {
   const response = await api
     .post('/api/blogs')
     .send(newBlog)
+    .set('Authorization', `Bearer ${token}`)
     .expect(201)
     .expect('Content-Type', helper.contentType);
 
@@ -82,8 +93,9 @@ test('verify likes if empty = 0', async () => {
   assert.strictEqual(savedBlog.likes, 0);
 });
 
-test('create blog with title or url are missing', async () => {
+test('should fail to create blog with title or url are missing', async () => {
   const userID = await helper.userID();
+  const token = await helper.getToken();
 
   const newBlog = [
     {
@@ -113,9 +125,33 @@ test('create blog with title or url are missing', async () => {
     await api
       .post('/api/blogs')
       .send(blog)
+      .set('Authorization', `Bearer ${token}`)
       .expect(400)
       .expect('Content-Type', helper.contentType);
   }
+});
+
+test('should fail to create a blog with worng credential', async () => {
+  const userID = await helper.userID();
+  const token = await api
+    .post('/login')
+    .send({ username: 'usertest2', password: 'passwordUserTest2' })
+    .then((res) => res.body.data.token);
+
+  const newBlog = {
+    title: 'wrong credential',
+    author: 'wrong credential',
+    url: 'wrongcredential.com',
+    likes: 2,
+    userId: userID,
+  };
+
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .set('Authorization', `Bearer ${token}`)
+    .expect(401)
+    .expect('Content-Type', helper.contentType);
 });
 
 after(async () => {

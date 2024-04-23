@@ -51,18 +51,20 @@ blogRouter.post('/', async (req, res, next) => {
       author,
       url,
       likes,
-      user: user.id,
+      user: req.user.id,
     });
 
-    const savedBlog = await blog.save();
+    if (user.id === req.user.id) {
+      const savedBlog = await blog.save();
 
-    user.blogs = user.blogs.concat(savedBlog._id);
-    await user.save();
+      user.blogs = user.blogs.concat(savedBlog._id);
+      await user.save();
 
-    res.status(201).json({
-      status: 'success',
-      data: savedBlog,
-    });
+      res.status(201).json({
+        status: 'success',
+        data: savedBlog,
+      });
+    }
   } catch (error) {
     next(error);
   }
