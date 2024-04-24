@@ -3,8 +3,6 @@ const DB = require('../models');
 
 blogRouter.get('/', async (req, res, next) => {
   try {
-    console.log(req.user);
-
     const blogs = await DB.blogModel.find({}).populate('user', {
       username: 1,
       name: 1,
